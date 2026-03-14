@@ -15,4 +15,6 @@
     <string name="lyrics">Lyrics</string>
     <string name="queue">Queue</string>
     <string name="share">Share</string>
+    <string name="search">Search</string>
+    <string name="back">Back</string>
 </resources>
