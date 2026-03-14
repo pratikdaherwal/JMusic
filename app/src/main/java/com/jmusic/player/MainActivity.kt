@@ -4,6 +4,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.view.MotionEvent
 import android.view.View
 import android.widget.ImageButton
 import android.widget.SeekBar
@@ -11,8 +12,6 @@ import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
-import androidx.transition.Slide
-import androidx.transition.TransitionManager
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 
 class MainActivity : AppCompatActivity() {
@@ -24,11 +23,17 @@ class MainActivity : AppCompatActivity() {
     private lateinit var miniProgressBar: SeekBar
     private lateinit var miniPlayPauseBtn: ImageButton
     private lateinit var miniPlayerContainer: View
+    private lateinit var searchBtn: ImageButton
 
     // Sample song data
     private var isPlaying = false
     private val handler = Handler(Looper.getMainLooper())
     private var progress = 30
+    
+    // Swipe gesture variables
+    private var startY = 0f
+    private var currentY = 0f
+    private val SWIPE_THRESHOLD = 100f // Minimum swipe distance to trigger full screen
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -40,11 +45,14 @@ class MainActivity : AppCompatActivity() {
         // Initialize mini player views
         initMiniPlayerViews()
 
-        // Setup mini player click listeners
+        // Setup mini player click listeners and swipe gestures
         setupMiniPlayerListeners()
 
         // Setup sample song clicks
         setupSampleSongs()
+        
+        // Setup search button
+        setupSearchButton()
 
         // Start progress simulation
         startProgressSimulation()
@@ -65,6 +73,7 @@ class MainActivity : AppCompatActivity() {
         miniArtistName = findViewById(R.id.miniArtistName)
         miniProgressBar = findViewById(R.id.miniProgressBar)
         miniPlayPauseBtn = findViewById(R.id.miniPlayPauseBtn)
+        searchBtn = findViewById(R.id.searchBtn)
 
         // Set initial progress
         miniProgressBar.progress = progress
@@ -92,6 +101,44 @@ class MainActivity : AppCompatActivity() {
             override fun onStartTrackingTouch(seekBar: SeekBar?) {}
             override fun onStopTrackingTouch(seekBar: SeekBar?) {}
         })
+        
+        // Swipe up gesture to open full screen player
+        setupSwipeUpGesture()
+    }
+    
+    private fun setupSwipeUpGesture() {
+        miniPlayerContainer.setOnTouchListener { v, event ->
+            when (event.action) {
+                MotionEvent.ACTION_DOWN -> {
+                    startY = event.rawY
+                    true
+                }
+                MotionEvent.ACTION_MOVE -> {
+                    currentY = event.rawY
+                    true
+                }
+                MotionEvent.ACTION_UP -> {
+                    val deltaY = startY - currentY
+                    
+                    if (deltaY > SWIPE_THRESHOLD) {
+                        // Swipe up detected, open full screen player
+                        openFullScreenPlayer()
+                        true
+                    } else {
+                        false // Let onClick handle it
+                    }
+                }
+                else -> false
+            }
+        }
+    }
+
+    private fun setupSearchButton() {
+        searchBtn.setOnClickListener {
+            val intent = Intent(this, SearchActivity::class.java)
+            startActivity(intent)
+            // No animation, just normal transition
+        }
     }
 
     private fun setupSampleSongs() {

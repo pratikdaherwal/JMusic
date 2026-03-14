@@ -32,6 +32,12 @@
             android:launchMode="singleTop"
             android:theme="@style/Theme.JMusic.FullScreen" />
 
+        <activity
+            android:name=".SearchActivity"
+            android:exported="false"
+            android:launchMode="singleTop"
+            android:theme="@style/Theme.JMusic" />
+
     </application>
 
 </manifest>
